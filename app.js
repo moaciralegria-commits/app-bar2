@@ -125,6 +125,15 @@ const els = {
 
 function renderParticipants() {
   els.list.innerHTML = '';
+  els.list.classList.toggle('is-empty', state.participants.length === 0);
+
+  if (state.participants.length > 0) {
+    const count = document.createElement('span');
+    count.className = 'count';
+    count.textContent = `${state.participants.length} ${state.participants.length === 1 ? 'pessoa' : 'pessoas'}`;
+    els.list.appendChild(count);
+  }
+
   state.participants.forEach(p => {
     const li = document.createElement('li');
     li.textContent = p.name;
@@ -134,17 +143,36 @@ function renderParticipants() {
     x.setAttribute('aria-label', `Remover ${p.name}`);
     x.addEventListener('click', () => {
       state.participants = state.participants.filter(it => it.id !== p.id);
-      // Drop any relation that references this person
       state.relations = state.relations.filter(r => r.aId !== p.id && r.bId !== p.id);
       renderParticipants();
-      renderRelations();
     });
     li.appendChild(x);
     els.list.appendChild(li);
   });
-  els.toLayoutBtn.disabled = state.participants.length < 2;
+  // Button is always clickable; we validate inside the handler so the user
+  // gets feedback if they forgot to actually add a name.
+  els.toLayoutBtn.classList.toggle('primary', state.participants.length >= 2);
   els.relationsSection.hidden = state.participants.length < 2;
   renderRelations();
+}
+
+function addNamesFromInput() {
+  const raw = els.nameInput.value;
+  if (!raw.trim()) return 0;
+  const names = raw
+    .split(/[,;\n]+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+  let added = 0;
+  for (const name of names) {
+    if (name.length > 30) continue;
+    if (state.participants.some(p => p.name.toLowerCase() === name.toLowerCase())) continue;
+    state.participants.push({ id: uid(), name });
+    added++;
+  }
+  els.nameInput.value = '';
+  renderParticipants();
+  return added;
 }
 
 function renderRelations() {
@@ -215,21 +243,36 @@ els.addRelationBtn.addEventListener('click', () => {
   renderRelations();
 });
 
-els.addForm.addEventListener('submit', e => {
-  e.preventDefault();
-  const name = els.nameInput.value.trim();
-  if (!name) return;
-  if (state.participants.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-    els.nameInput.value = '';
-    return;
-  }
-  state.participants.push({ id: uid(), name });
-  els.nameInput.value = '';
-  els.nameInput.focus();
-  renderParticipants();
+const ORIG_PLACEHOLDER = els.nameInput.placeholder;
+els.nameInput.addEventListener('input', () => {
+  els.nameInput.placeholder = ORIG_PLACEHOLDER;
 });
 
-els.toLayoutBtn.addEventListener('click', () => showScreen('screen-layout'));
+els.addForm.addEventListener('submit', e => {
+  e.preventDefault();
+  addNamesFromInput();
+  els.nameInput.focus();
+});
+
+// Auto-add anything still typed in the input when the user taps away.
+// Handles the common case of "I typed a name but forgot to tap +".
+els.nameInput.addEventListener('blur', () => {
+  addNamesFromInput();
+});
+
+els.toLayoutBtn.addEventListener('click', () => {
+  // Sweep up any pending text first
+  if (els.nameInput.value.trim()) addNamesFromInput();
+  if (state.participants.length < 2) {
+    els.nameInput.focus();
+    els.nameInput.classList.remove('shake');
+    void els.nameInput.offsetWidth; // restart animation
+    els.nameInput.classList.add('shake');
+    els.nameInput.placeholder = 'Precisa de pelo menos 2 nomes…';
+    return;
+  }
+  showScreen('screen-layout');
+});
 
 // =========================================================
 // Layout editor

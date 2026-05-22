@@ -21,9 +21,10 @@
       <h2>Quem tá na rodada?</h2>
       <ul id="participants-list"></ul>
       <form id="add-participant">
-        <input type="text" id="participant-name" placeholder="Nome de quem chegou" autocomplete="off" maxlength="20">
-        <button type="submit">+</button>
+        <input type="text" id="participant-name" placeholder="Nome (ou vários separados por vírgula)" autocomplete="off" maxlength="120">
+        <button type="submit">+ Adicionar</button>
       </form>
+      <p class="hint hint-add">Dica: pode digitar vários nomes de uma vez: <em>João, Maria, Pedro</em>.</p>
 
       <section class="relations-section" id="relations-section" hidden>
         <h2>Vínculos <span class="opt">(opcional)</span></h2>
@@ -41,7 +42,7 @@
       </section>
 
       <div class="actions">
-        <button id="to-layout" class="primary" disabled>Montar mesas →</button>
+        <button id="to-layout">Montar mesas →</button>
       </div>
     </section>
 

@@ -111,7 +111,26 @@ ul { list-style: none; }
   flex-wrap: wrap;
   gap: 8px;
   margin: 12px 0 16px;
-  min-height: 8px;
+  min-height: 44px;
+  padding: 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  align-items: center;
+}
+#participants-list.is-empty::before {
+  content: "👥 Adicione 2 ou mais nomes abaixo";
+  color: var(--text-dim);
+  font-size: 13px;
+  font-style: italic;
+  width: 100%;
+  text-align: center;
+}
+#participants-list .count {
+  color: var(--text-dim);
+  font-size: 12px;
+  width: 100%;
+  margin-bottom: -2px;
 }
 #participants-list li {
   background: var(--surface);
@@ -135,7 +154,16 @@ ul { list-style: none; }
 #add-participant {
   display: flex;
   gap: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 6px;
+}
+.hint-add { margin-bottom: 20px; font-size: 12px; }
+.hint-add em { color: var(--accent-2); font-style: normal; }
+
+.shake { animation: shake 0.35s; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
 }
 
 .relations-section { margin: 8px 0 24px; }
@@ -201,14 +229,15 @@ ul { list-style: none; }
   font-weight: 700;
   font-size: 16px;
 }
-#add-participant input { flex: 1; }
+#add-participant input { flex: 1; min-width: 0; }
 #add-participant button {
   background: var(--accent);
   color: #2a0d1a;
   border-color: var(--accent);
   font-weight: 700;
-  padding: 0 20px;
-  font-size: 22px;
+  padding: 0 16px;
+  font-size: 15px;
+  white-space: nowrap;
 }
 
 .actions {
@@ -436,9 +465,10 @@ details label.checkbox { gap: 8px; }
       <h2>Quem tá na rodada?</h2>
       <ul id="participants-list"></ul>
       <form id="add-participant">
-        <input type="text" id="participant-name" placeholder="Nome de quem chegou" autocomplete="off" maxlength="20">
-        <button type="submit">+</button>
+        <input type="text" id="participant-name" placeholder="Nome (ou vários separados por vírgula)" autocomplete="off" maxlength="120">
+        <button type="submit">+ Adicionar</button>
       </form>
+      <p class="hint hint-add">Dica: pode digitar vários nomes de uma vez: <em>João, Maria, Pedro</em>.</p>
 
       <section class="relations-section" id="relations-section" hidden>
         <h2>Vínculos <span class="opt">(opcional)</span></h2>
@@ -456,7 +486,7 @@ details label.checkbox { gap: 8px; }
       </section>
 
       <div class="actions">
-        <button id="to-layout" class="primary" disabled>Montar mesas →</button>
+        <button id="to-layout">Montar mesas →</button>
       </div>
     </section>
 
@@ -654,6 +684,15 @@ const els = {
 
 function renderParticipants() {
   els.list.innerHTML = '';
+  els.list.classList.toggle('is-empty', state.participants.length === 0);
+
+  if (state.participants.length > 0) {
+    const count = document.createElement('span');
+    count.className = 'count';
+    count.textContent = `${state.participants.length} ${state.participants.length === 1 ? 'pessoa' : 'pessoas'}`;
+    els.list.appendChild(count);
+  }
+
   state.participants.forEach(p => {
     const li = document.createElement('li');
     li.textContent = p.name;
@@ -663,17 +702,36 @@ function renderParticipants() {
     x.setAttribute('aria-label', `Remover ${p.name}`);
     x.addEventListener('click', () => {
       state.participants = state.participants.filter(it => it.id !== p.id);
-      // Drop any relation that references this person
       state.relations = state.relations.filter(r => r.aId !== p.id && r.bId !== p.id);
       renderParticipants();
-      renderRelations();
     });
     li.appendChild(x);
     els.list.appendChild(li);
   });
-  els.toLayoutBtn.disabled = state.participants.length < 2;
+  // Button is always clickable; we validate inside the handler so the user
+  // gets feedback if they forgot to actually add a name.
+  els.toLayoutBtn.classList.toggle('primary', state.participants.length >= 2);
   els.relationsSection.hidden = state.participants.length < 2;
   renderRelations();
+}
+
+function addNamesFromInput() {
+  const raw = els.nameInput.value;
+  if (!raw.trim()) return 0;
+  const names = raw
+    .split(/[,;\n]+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+  let added = 0;
+  for (const name of names) {
+    if (name.length > 30) continue;
+    if (state.participants.some(p => p.name.toLowerCase() === name.toLowerCase())) continue;
+    state.participants.push({ id: uid(), name });
+    added++;
+  }
+  els.nameInput.value = '';
+  renderParticipants();
+  return added;
 }
 
 function renderRelations() {
@@ -744,21 +802,36 @@ els.addRelationBtn.addEventListener('click', () => {
   renderRelations();
 });
 
-els.addForm.addEventListener('submit', e => {
-  e.preventDefault();
-  const name = els.nameInput.value.trim();
-  if (!name) return;
-  if (state.participants.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-    els.nameInput.value = '';
-    return;
-  }
-  state.participants.push({ id: uid(), name });
-  els.nameInput.value = '';
-  els.nameInput.focus();
-  renderParticipants();
+const ORIG_PLACEHOLDER = els.nameInput.placeholder;
+els.nameInput.addEventListener('input', () => {
+  els.nameInput.placeholder = ORIG_PLACEHOLDER;
 });
 
-els.toLayoutBtn.addEventListener('click', () => showScreen('screen-layout'));
+els.addForm.addEventListener('submit', e => {
+  e.preventDefault();
+  addNamesFromInput();
+  els.nameInput.focus();
+});
+
+// Auto-add anything still typed in the input when the user taps away.
+// Handles the common case of "I typed a name but forgot to tap +".
+els.nameInput.addEventListener('blur', () => {
+  addNamesFromInput();
+});
+
+els.toLayoutBtn.addEventListener('click', () => {
+  // Sweep up any pending text first
+  if (els.nameInput.value.trim()) addNamesFromInput();
+  if (state.participants.length < 2) {
+    els.nameInput.focus();
+    els.nameInput.classList.remove('shake');
+    void els.nameInput.offsetWidth; // restart animation
+    els.nameInput.classList.add('shake');
+    els.nameInput.placeholder = 'Precisa de pelo menos 2 nomes…';
+    return;
+  }
+  showScreen('screen-layout');
+});
 
 // =========================================================
 // Layout editor
