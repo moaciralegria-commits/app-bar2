@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a1124">
+  <title>Mesa Viva — embaralhador de bar</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+
+    <section id="screen-setup" class="screen active">
+      <header>
+        <div>
+          <h1>Mesa Viva</h1>
+          <p class="tagline">Mexe a galera, faz amizade.</p>
+        </div>
+      </header>
+
+      <h2>Quem tá na rodada?</h2>
+      <ul id="participants-list"></ul>
+      <form id="add-participant">
+        <input type="text" id="participant-name" placeholder="Nome de quem chegou" autocomplete="off" maxlength="20">
+        <button type="submit">+</button>
+      </form>
+
+      <div class="actions">
+        <button id="to-layout" class="primary" disabled>Montar mesas →</button>
+      </div>
+    </section>
+
+    <section id="screen-layout" class="screen">
+      <header>
+        <button class="back" data-target="screen-setup">←</button>
+        <h2>Planta do bar</h2>
+      </header>
+
+      <div class="info-bar">
+        <span>Pessoas: <strong id="people-count">0</strong></span>
+        <span>Capacidade: <strong id="capacity-count">0</strong></span>
+      </div>
+
+      <p class="hint">Escolha um tipo de mesa e toque numa célula vazia para colocar. Para apagar, escolha "Apagar" e toque numa mesa.</p>
+
+      <div class="palette" id="palette"></div>
+      <div id="grid"></div>
+
+      <div class="actions">
+        <button id="clear-grid">Limpar tudo</button>
+        <button id="to-session" class="primary" disabled>Começar rodada →</button>
+      </div>
+    </section>
+
+    <section id="screen-session" class="screen">
+      <header>
+        <div>
+          <h2>Rodada <span id="round-num">1</span></h2>
+          <p class="tagline" id="round-info">—</p>
+        </div>
+        <div id="timer">--:--</div>
+      </header>
+
+      <div id="layout-view"></div>
+
+      <div class="icebreaker">
+        <span class="label">Provocação da rodada</span>
+        <p id="icebreaker-text">—</p>
+        <button id="new-icebreaker" aria-label="Outra">↻</button>
+      </div>
+
+      <div class="info-bar">
+        <span>Novas duplas: <strong id="new-pairs">0</strong></span>
+        <span>Total no histórico: <strong id="total-pairs">0</strong></span>
+        <span>Cobertura: <strong id="coverage">0%</strong></span>
+      </div>
+
+      <div class="actions">
+        <button id="toggle-pause">⏸ Pausar</button>
+        <button id="shuffle-now" class="primary">Trocar agora ↻</button>
+      </div>
+      <div class="actions">
+        <button id="end-session" class="ghost">Encerrar sessão</button>
+      </div>
+
+      <details>
+        <summary>Configurações</summary>
+        <label>Duração da rodada (min):
+          <input type="number" id="round-minutes" min="1" max="120" value="15">
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="sound-on" checked> Som ao trocar
+        </label>
+      </details>
+    </section>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
