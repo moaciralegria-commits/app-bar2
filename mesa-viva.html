@@ -21,6 +21,26 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
+.no-js-warning {
+  background: #fef3c7;
+  color: #78350f;
+  border: 2px solid #f59e0b;
+  padding: 16px;
+  margin: 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.js-ok-banner {
+  background: #064e3b;
+  color: #6ee7b7;
+  font-size: 11px;
+  text-align: center;
+  padding: 4px;
+  letter-spacing: 0.5px;
+}
+
 html, body { height: 100%; }
 
 body {
@@ -452,6 +472,15 @@ details label.checkbox { gap: 8px; }
 </style>
 </head>
 <body>
+  <noscript>
+    <div class="no-js-warning">
+      ⚠ <strong>JavaScript desativado.</strong>
+      Se você abriu este arquivo pelo preview do Files (iPhone), feche e abra novamente <strong>em uma aba do Safari/Chrome</strong> — o preview do Files não executa scripts. No desktop, abrir com duplo clique funciona normalmente.
+    </div>
+  </noscript>
+
+  <div id="js-ok" class="js-ok-banner" hidden>✅ App pronto · v3</div>
+
   <div id="app">
 
     <section id="screen-setup" class="screen active">
@@ -486,7 +515,7 @@ details label.checkbox { gap: 8px; }
       </section>
 
       <div class="actions">
-        <button id="to-layout">Montar mesas →</button>
+        <button id="to-layout" class="primary">Montar mesas →</button>
       </div>
     </section>
 
@@ -708,9 +737,6 @@ function renderParticipants() {
     li.appendChild(x);
     els.list.appendChild(li);
   });
-  // Button is always clickable; we validate inside the handler so the user
-  // gets feedback if they forgot to actually add a name.
-  els.toLayoutBtn.classList.toggle('primary', state.participants.length >= 2);
   els.relationsSection.hidden = state.participants.length < 2;
   renderRelations();
 }
@@ -1213,10 +1239,32 @@ document.querySelectorAll('.back').forEach(b => {
 });
 
 // =========================================================
+// iOS-friendly tap handling
+// =========================================================
+// On iOS, tapping a button while a text input has focus can cause the keyboard
+// to dismiss and the viewport to reflow, which sometimes "eats" the click on
+// the button. Listen to pointerdown so the action fires before that happens.
+
+// pointerdown fires before the input loses focus, so we add the pending
+// name even if the click event gets eaten by an iOS reflow. The submit
+// and click handlers below are safety nets — addNamesFromInput is
+// idempotent (an empty input is a no-op).
+els.addForm.querySelector('button').addEventListener('pointerdown', () => {
+  addNamesFromInput();
+});
+
+// =========================================================
 // Init
 // =========================================================
 
 renderParticipants();
+
+// Visible confirmation that JS is running (helps debugging on mobile)
+const okBanner = document.getElementById('js-ok');
+if (okBanner) {
+  okBanner.hidden = false;
+  setTimeout(() => { okBanner.style.opacity = '0.3'; }, 3000);
+}
 
 </script>
 </body>

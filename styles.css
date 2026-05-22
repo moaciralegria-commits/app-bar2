@@ -13,6 +13,26 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
+.no-js-warning {
+  background: #fef3c7;
+  color: #78350f;
+  border: 2px solid #f59e0b;
+  padding: 16px;
+  margin: 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.js-ok-banner {
+  background: #064e3b;
+  color: #6ee7b7;
+  font-size: 11px;
+  text-align: center;
+  padding: 4px;
+  letter-spacing: 0.5px;
+}
+
 html, body { height: 100%; }
 
 body {

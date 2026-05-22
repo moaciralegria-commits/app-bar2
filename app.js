@@ -149,9 +149,6 @@ function renderParticipants() {
     li.appendChild(x);
     els.list.appendChild(li);
   });
-  // Button is always clickable; we validate inside the handler so the user
-  // gets feedback if they forgot to actually add a name.
-  els.toLayoutBtn.classList.toggle('primary', state.participants.length >= 2);
   els.relationsSection.hidden = state.participants.length < 2;
   renderRelations();
 }
@@ -654,7 +651,29 @@ document.querySelectorAll('.back').forEach(b => {
 });
 
 // =========================================================
+// iOS-friendly tap handling
+// =========================================================
+// On iOS, tapping a button while a text input has focus can cause the keyboard
+// to dismiss and the viewport to reflow, which sometimes "eats" the click on
+// the button. Listen to pointerdown so the action fires before that happens.
+
+// pointerdown fires before the input loses focus, so we add the pending
+// name even if the click event gets eaten by an iOS reflow. The submit
+// and click handlers below are safety nets — addNamesFromInput is
+// idempotent (an empty input is a no-op).
+els.addForm.querySelector('button').addEventListener('pointerdown', () => {
+  addNamesFromInput();
+});
+
+// =========================================================
 // Init
 // =========================================================
 
 renderParticipants();
+
+// Visible confirmation that JS is running (helps debugging on mobile)
+const okBanner = document.getElementById('js-ok');
+if (okBanner) {
+  okBanner.hidden = false;
+  setTimeout(() => { okBanner.style.opacity = '0.3'; }, 3000);
+}
