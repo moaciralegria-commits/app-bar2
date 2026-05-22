@@ -127,7 +127,71 @@ ul { list-style: none; }
 #add-participant {
   display: flex;
   gap: 8px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+}
+
+.relations-section { margin: 8px 0 24px; }
+.relations-section h2 { margin-bottom: 4px; }
+.relations-section .opt {
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+#relations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+}
+#relations-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+#relations-list li.together { border-left: 4px solid var(--accent); }
+#relations-list li.separate { border-left: 4px solid var(--accent-3); }
+#relations-list li .icon { font-size: 16px; }
+#relations-list li .names { flex: 1; }
+#relations-list li button {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 18px;
+  padding: 0 4px;
+}
+
+.relation-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.relation-form #rel-a { grid-column: 1; grid-row: 1; }
+.relation-form #rel-b { grid-column: 2; grid-row: 1; }
+.relation-form #rel-mode { grid-column: 1 / -1; grid-row: 2; }
+.relation-form button { grid-column: 1 / -1; grid-row: 3; padding: 10px; }
+.relation-form select {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  min-width: 0;
+  width: 100%;
+}
+.relation-form button {
+  background: var(--accent);
+  color: #2a0d1a;
+  border-color: var(--accent);
+  font-weight: 700;
+  font-size: 16px;
 }
 #add-participant input { flex: 1; }
 #add-participant button {

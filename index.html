@@ -25,6 +25,21 @@
         <button type="submit">+</button>
       </form>
 
+      <section class="relations-section" id="relations-section" hidden>
+        <h2>Vínculos <span class="opt">(opcional)</span></h2>
+        <p class="hint">Marque pares que devem ficar <strong>juntos</strong> (casais, melhores amigos) ou <strong>separados</strong> (ex, briga rolando) em todas as rodadas.</p>
+        <ul id="relations-list"></ul>
+        <div class="relation-form">
+          <select id="rel-a" aria-label="Pessoa A"><option value="">—</option></select>
+          <select id="rel-mode" aria-label="Modo">
+            <option value="together">💞 juntos</option>
+            <option value="separate">⚡ separados</option>
+          </select>
+          <select id="rel-b" aria-label="Pessoa B"><option value="">—</option></select>
+          <button type="button" id="add-relation-btn" aria-label="Adicionar vínculo">+</button>
+        </div>
+      </section>
+
       <div class="actions">
         <button id="to-layout" class="primary" disabled>Montar mesas →</button>
       </div>
